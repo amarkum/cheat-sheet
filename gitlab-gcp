@@ -1,0 +1,23 @@
+stages : 
+    - build
+    - deploy
+
+build-docker-image:
+  image: docker:latest
+  stage: build
+  services:
+    - docker:dind
+  before_script:
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+  script:
+    - docker build --pull -t "$CI_REGISTRY_IMAGE" .
+    - docker push "$CI_REGISTRY_IMAGE"
+
+gcp-deploy:
+  stage: deploy
+  image: google/cloud-sdk
+  script:
+    - gcloud config set project ecstatic-spirit-301116
+    - gcloud auth activate-service-account --key-file $GCP_SERVICE_CREDS
+    - gcloud config set compute/zone us-east1-b
+    - gcloud compute instances update-container flask-webservice --container-image "$CI_REGISTRY_IMAGE"
