@@ -1,0 +1,22 @@
+stages :
+    - build-gcp-image
+    - deploy
+ 
+build-docker-gcp:
+  stage: build-gcp-image
+  image: docker:latest
+  services:
+    - docker:dind
+  script:
+    - docker login -u _json_key -p "$(cat $GCP_SERVICE_CREDS)" https://us.gcr.io
+    - docker build --pull -t "us.gcr.io/ecstatic-spirit-301116/ramayan-capital-flask-app:latest" .
+    - docker push "us.gcr.io/ecstatic-spirit-301116/ramayan-capital-flask-app:latest"
+
+gcp-deploy:
+  stage: deploy
+  image: google/cloud-sdk
+  script:
+    - gcloud config set project ecstatic-spirit-301116
+    - gcloud auth activate-service-account --key-file $GCP_SERVICE_CREDS
+    - gcloud config set compute/zone us-east1-b
+    - gcloud compute instances create-with-container ramayan-capital-flask-app --container-image "us.gcr.io/ecstatic-spirit-301116/ramayan-capital-flask-app:latest" --zone us-east1-b --subnet vpc-gcp-one-us-east
