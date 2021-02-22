@@ -1,2 +1,2 @@
 # dev-ops
-Configurationfiles for DevOps
+Configuration files for DevOps
