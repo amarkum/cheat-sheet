@@ -1,0 +1,28 @@
+stages :
+    - build-gcp-image
+    - deploy
+ 
+build-docker-gcp:
+  stage: build-gcp-image
+  image: docker:latest
+  services:
+    - docker:dind
+  script:
+    - docker login -u _json_key -p "$(cat $GCP_SERVICE_CREDS)" https://us.gcr.io
+    - docker build --no-cache --pull -t "us.gcr.io/ecstatic-spirit-301116/ramayan-capital-flask-app" .
+    - docker push "us.gcr.io/ecstatic-spirit-301116/ramayan-capital-flask-app"
+
+gcp-deploy:
+  stage: deploy
+  image: google/cloud-sdk
+  script:
+    - chmod 600 "$SSH_PRIVATE_KEY"
+    # - eval $(ssh-agent -s)
+    # - ssh-add <(echo "$SSH_PRIVATE_KEY" | base64 -d)
+    # - ssh devops@api.ramayancapital.com
+    - ssh -o StrictHostKeyChecking=no -i "$SSH_PRIVATE_KEY" devops@api.ramayancapital.com "docker rm -vf klt-ramayan-capital-react-app-bdvd; docker system prune -a -f"
+    - gcloud config set project ecstatic-spirit-301116
+    - gcloud auth activate-service-account --key-file $GCP_SERVICE_CREDS
+    - gcloud config set compute/zone us-east1-b
+    - gcloud compute instances update-container ramayan-capital-flask-app --container-image "us.gcr.io/ecstatic-spirit-301116/ramayan-capital-flask-app"
+    # - gcloud compute instances create-with-container ramayan-capital-flask-app --container-image "us.gcr.io/ecstatic-spirit-301116/ramayan-capital-flask-app:latest" --zone us-east1-b --subnet vpc-gcp-one-us-east
