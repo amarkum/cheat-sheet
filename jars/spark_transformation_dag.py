@@ -2,6 +2,7 @@ from airflow.contrib.operators.spark_submit_operator import SparkSubmitOperator
 from airflow.models import DAG
 from airflow.utils.dates import days_ago
 
+# TO-DO - Change the file to create custom task ID
 command = "{{dag_run.conf.get('command')}}"
 input_file = "{{dag_run.conf.get('input')}}"
 output_file = "{{dag_run.conf.get('output')}}"
@@ -21,6 +22,5 @@ dedupe_spark_job = SparkSubmitOperator(task_id="de-dupe-transformation",
                                        application="/airflow/spark-core.jar",
                                        conn_id="spark-local", dag=dag_conf, **dedupe_config)
 
-if command == "dedupe":
-    dedupe_spark_job
+dedupe_spark_job
 
