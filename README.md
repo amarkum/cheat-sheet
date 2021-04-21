@@ -6,4 +6,4 @@ Configuration files for DevOps
 
 
 ### Login to container as a root user
-docker exec -u root <container> bash
+`$ docker exec -u root container-id bash`
