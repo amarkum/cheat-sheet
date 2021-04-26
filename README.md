@@ -1,4 +1,5 @@
 # cheat-sheet
+### most frequently used command for major platform
 
 # Airflow
 ### commands to refresh DAG in Airflow
