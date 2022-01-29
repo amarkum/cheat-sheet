@@ -1,2 +1,2 @@
 # Cheat Sheet
-### Quick reference to the most use & past work
+#### Quick reference to the most used & past work
